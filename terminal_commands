@@ -1,0 +1,122 @@
+# TERMINAL COMMANDS - JvG
+
+# General commands  
+nvidia-smi #45gb ram nvidia A40
+pip install #add aditional packages
+# scratch  (local directory 512 gb)
+echo $SCRATCH #cd $SCRATCH #ls #ls -lt
+cd $SCRATCH
+pwd # PrintWorkingDirectory
+vget 
+!ls $SCRATCH/Jorrit, ls -1 | wc -l
+watch nvidia-smi
+cat # reading lines within file
+cat img*. 
+../../../../../
+
+# GET AZCOPY
+# download azcopy (Azure) tar file from -> https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10, drag and drop into Galdor
+# Now you use the CMD terminal. Navigate (cd) to the folder where it was dropped and untar it using
+tar -xvzf /auto/plzen4-ntis/home/picekl/Projects/Jorrit/azcopy_linux_amd64_10.17.0.tar.gz
+
+# DOWNLOADING CALTECH DATA TO SCRATCH
+./azcopy cp "https://lilablobssc.blob.core.windows.net/caltechcameratraps/eccv_18_all_images_sm.tar.gz" "$SCRATCH/Jorrit/datasets/CCT20_coco/" --recursive 
+./azcopy cp "https://lilablobssc.blob.core.windows.net/caltechcameratraps/eccv_18_annotations.tar.gz" "$SCRATCH/Jorrit/datasets/CCT20_coco/" --recursive
+# cd to the folder where you want the files to be extracted and the path within the tar command line shows where the tar/zip file can be found
+tar -xvzf $SCRATCH/Jorrit/datasets/CCT20_coco/eccv_18_all_images_sm.tar.gz
+tar -xvzf $SCRATCH/Jorrit/datasets/CCT20_coco/eccv_18_annotations.tar.gz
+
+# UNZIP & CHMOD $ TAR
+unzip /auto/plzen4-ntis/home/picekl/Projects/Jorrit/deeplabcut_model.zip
+unzip ./20230224_manual_split_DLC_model.zip -d $SCRATCH/Jorrit/wildlife_AR/training_datasets
+unzip ./20230219_random_split_DLC_model.zip -d $SCRATCH/Jorrit/wildlife_AR/training_datasets
+chmod u+x /auto/plzen4-ntis/home/picekl/Projects/Jorrit/deeplabcut_model.zip
+tar -xvzf /auto/plzen4-ntis/home/picekl/Projects/Jorrit/azcopy_linux_amd64_10.17.0.tar.gz
+
+# COPYING -d for directories
+cp $SCRATCH/Jorrit/datasets/CCT20_yolo/images/img0.jpg -d /auto/plzen4-ntis/home/picekl/Projects/Jorrit
+cp $SCRATCH/Jorrit/datasets/CCT20_yolo/labels/img0.txt -d /auto/plzen4-ntis/home/picekl/Projects/Jorrit
+cp -R /auto/plzen4-ntis/home/picekl/Projects/Jorrit/wildlife_AR/20230224_manual_split_DLC_model $SCRATCH/Jorrit/wildlife_AR/training_datasets/
+cp -R /auto/plzen4-ntis/home/picekl/Projects/Jorrit/wildlife_AR/20230219_random_split_DLC_model $SCRATCH/Jorrit/wildlife_AR/training_datasets/
+cp -R Projects/Jorrit/Fathomnet_2023/move_to_scratch $SCRATCH/Jorrit/
+
+# YOLO - Training
+python train.py --data coco.yaml --epochs 300 --weights '' --cfg yolov5n.yaml  --batch-size 128 --device gpu
+python train.py --data CCT20.yaml --epochs 3 --weights '' --cfg yolov5n.yaml  --batch-size 2 
+python train.py --data CCT20.yaml --epochs 3 --weights '' --cfg yolov5n.yaml  --batch-size 2 --device gpu
+python train.py --data FN23.yaml --epochs 3 --weights '' --cfg yolov5n.yaml  --batch-size 1 --device cpu
+python train.py --data FN23.yaml --epochs 3 --weights '' --cfg yolov5n.yaml  --batch-size 1 --device cpu
+python train.py --data FN23.yaml --epochs 100 --weights '' --cfg yolov5n.yaml  --batch-size 8 --device gpu
+python train.py --data FN23.yaml --epochs 100 --weights '' --cfg yolov5n.yaml  --batch-size 8 --device 0 # If multiple gpu, choose 0 or 1 etc.
+
+# copy weight path runs/train/exp8/weights/last.pt or best_900epochs_train_test_split_apr18.pt
+
+# YOLO - Inference
+python detect.py --data ~/Projects/Jorrit/apple.jpg --view-img 
+python detect.py --source 0 # For YOLOv5s (s=small version)
+python detect.py --weights yolov5x.pt --source 0
+python detect.py --weights yolov5x.pt --data ~/Desktop/026c7465-309f6d33.mp4 --view-img 
+python detect.py --weights ../models/initial_baseline_exp3_best.pt --data ../datasets/example_fish_inference.jpg --view-img 
+python detect.py --weights /media/jorrit/Storage SSD/fathomnet/models/initial_baseline_exp3_best.pt --data /media/jorrit/Storage SSD/fathomnet/datasets/example_fish_inference.jpg --view-img 
+python detect.py --weights /media/jorrit/Storage\ SSD/fathomnet/models/initial_baseline_exp3_best.pt --source /media/jorrit/Storage\ SSD/fathomnet/datasets/example_fish_inference.jpg --view-img
+python detect.py --weights /media/jorrit/Storage\ SSD/fathomnet/models/initial_baseline_exp3_best.pt --source /media/jorrit/Storage\ SSD/fathomnet/datasets/82e14f11-e1e5-4cc5-9283-f2ecfba58787.png --view-img --save-txt
+python detect.py --weights /media/jorrit/Storage\ SSD/fathomnet/models/initial_baseline_exp3_best.pt --source /media/jorrit/Storage\ SSD/fathomnet/datasets/82e14f11-e1e5-4cc5-9283-f2ecfba58787.png /media/jorrit/Storage\ SSD/fathomnet/datasets/00a006ce-7e0a-4e97-8908-8991a2647ddd.png --view-img --save-txt
+python detect.py --weights /media/jorrit/Storage\ SSD/fathomnet/models/initial_baseline_exp3_best.pt --source /media/jorrit/Storage\ SSD/fathomnet/datasets/inference_example --view-img --save-txt
+python detect.py --weights /media/jorrit/Storage\ SSD/fathomnet/models/best_900epochs_train_test_split_apr18.pt --source /media/jorrit/Storage\ SSD/fathomnet/datasets/inference_example --img-size 1280 --device 0 --save-txt --save-conf --nosave
+python detect.py --weights /media/jorrit/Storage\ SSD/fathomnet/models/best_900epochs_train_test_split_apr18.pt --source /media/jorrit/Storage\ SSD/fathomnet/datasets/inference_example --img-size 1280 --device cpu --save-txt --save-conf --nosave
+python detect.py --weights /media/jorrit/Storage\ SSD/fathomnet/models/best_900epochs_train_test_split_apr18.pt --source /media/jorrit/Storage\ SSD/fathomnet/datasets/inference_example_test --img-size 1280 --device cpu --save-txt --save-conf --nosave
+python detect.py --weights /media/jorrit/Storage\ SSD/fathomnet/models/best_900epochs_train_test_split_apr18.pt --source /media/jorrit/Storage\ SSD/fathomnet/datasets/FN_23_yolo/test/images --img-size 1280 --device cpu --save-txt --save-conf --nosave
+python detect.py --weights /home/ubuntu/ml/fathomnet/yolov5/runs/train/exp4/weights/best.pt --source /home/ubuntu/ml/fathomnet/datasets/fathomnet_yolo_copy/test/images --img-size 1280 --device 0 --save-txt --save-conf --nosave
+python detect.py --weights ../models/best_900epochs_train_test_split_apr18.pt --source ../datasets/FN_23_yolo/test/images --img-size 1280 --device 0 --save-txt --save-conf --nosave
+
+# to generate a txt file also for images without detections. Add to detect.py lin 153 (within yolov5):
+if len(det) == 0:
+                with open(f'{txt_path}.txt', 'a') as f:
+                    pass
+
+# conf_tresh & iou_tresh experiments
+# high conf_tresh = only boxes that the model is very certain about (default = 0.25), high iou_tresh = only boxes that are very close to each other (default = 0.45)
+python detect.py --weights ../models/best_900epochs_train_test_split_apr18.pt --source ../datasets/FN_23_yolo/test/images --img-size 1280 --device 0 --save-txt --save-conf --nosave # exp24 - conf_tresh = 0.25, iou_tresh = 0.45 -> 
+python detect.py --weights ../models/best_900epochs_train_test_split_apr18.pt --source ../datasets/FN_23_yolo/test/images --img-size 1280 --device 0 --save-txt --save-conf --nosave --conf-thres 0.45 # exp25 - conf_tresh = 0.45, iou_tresh = 0.45 -> 
+python detect.py --weights ../models/best_900epochs_train_test_split_apr18.pt --source ../datasets/FN_23_yolo/test/images --img-size 1280 --device 0 --save-txt --save-conf --nosave --conf-thres 0.10 # exp26 - conf_tresh = 0.10, iou_tresh = 0.45, 
+python detect.py --weights ../models/best_900epochs_train_test_split_apr18.pt --source ../datasets/FN_23_yolo/test/images --img-size 1280 --device 0 --save-txt --save-conf --nosave --iou-thres 0.65 # exp27 - conf_tresh = 0.25, iou_tresh = 0.65,
+python detect.py --weights ../models/best_900epochs_train_test_split_apr18.pt --source ../datasets/FN_23_yolo/test/images --img-size 1280 --device 0 --save-txt --save-conf --nosave --iou-thres 0.25 # exp28 - conf_tresh = 0.25, iou_tresh = 0.25,
+
+# Inference on video
+# opload video in the general directory (in my case probably Jorrit). Run this inference code from the yolov5 github repo but change yolov5s.pt to the copied weights (!!!) and change --source data/images/ to ../video.mp4
+python detect.py --weights yolov5s.pt --source 0 # Results saved to runs/detect/exp4 
+
+# FATHOMNET - Preprocessing
+# 1 download zip file from kaggle
+# 2 Create in C: folder fathomnet and unzip into this folder
+# 3 create the outputpath folder img_train and img_eval download the images by running:
+python download_images.py D:/fathomnet/object_detection/train.json --outpath D:/fathomnet/datasets/FN_23_coco/img_train
+python download_images.py D:/fathomnet/object_detection/eval.json --outpath D:/fathomnet/datasets/FN_23_coco/img_eval
+# 4 add yolov5
+git clone https://github.com/ultralytics/yolov5
+cd yolov5
+pip install -r requirements.txt 
+
+# FATHOMNET - Stats:
+# old: train: 5950, valid: 10744
+# new: train 4150, valid 900, test: 10744
+
+# environments
+conda activate /home/jorrit/fnenv
+cd /media/jorrit/Storage\ SSD/fathomnet
+conda create --prefix ./fncenv #run this first from ~
+sudo /home/jorrit/anaconda3/bin/conda create --prefix # ./edcenv might be better
+conda activate /edcenv
+conda activate /home/jorrit/edenv
+conda env list
+conda create --name fathomnet
+conda activate fathomnet
+
+# connect local fathomnet to github
+cd media/jorrit/Storage\ SSD/fathomnet/
+git init
+git add .
+git commit -m "first commit, repo Fathomnet"
+git remote add origin https://github.com/JorritvanGils/Fathomnet_2023.git
+git push -u origin master
+

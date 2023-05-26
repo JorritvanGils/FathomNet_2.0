@@ -1,0 +1,35 @@
+backbone/feature extractor -> the timm_backbone.py 
+    without pooling or classification head (feature map/tensor)
+    features directly to transformer
+
+feature compression, position encoding and reshaping
+    [batch x channels x height x width]
+    implementation channels where reduced 512 to 256
+
+    q2l sinecoside positioning
+    to learn spatial relationships between pixels at different scales
+    reshape to [HEIGHT*WIDTH x BATCH_SIZE x CHANNELS]
+
+learnable label embeddings
+    [1 x NUM_CLASSES x HIDDEN_DIM]
+    training updates values label embeddings (fur golden retriever)
+
+Label Transformer
+    image features passes to encoder 'input embedding' (see image)
+    see blog explained encoder (key+value)-decoder (query)
+
+classification
+    output transformer: [TARGET x BATCH_SIZE x EMBED_SIZE]
+    transform into prob -> reshape-> [BATCH_SIZE x TARGET*EMBED_SIZE]
+    pass linear layer with one output for each potential label. 
+    # target, possible classes/objects
+    # batch_size processing .. images at the time
+    # embed_size, nr of features model uses to represent each object
+
+difference softmax & q2l class cat & dog example
+    softmax = output last layer apply softmax -> prob dist (sum = 1)
+            cross-entr (predictions compared with GT) measure of diff
+
+    q2l = output last layer model directly to binary cross entropy loss function, measures the difference with GT
+    
+

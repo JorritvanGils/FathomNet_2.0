@@ -1,0 +1,9 @@
+category_id,name,supercat,annotation_id,image_id,area,bbox
+1,Actiniaria,Anemone,14,5,315.0,"[156.0, 270.0, 21.0, 15.0]"
+37,Merluccius productus,Fish,12,5,2520.0,"[439.0, 157.0, 60.0, 42.0]"
+51,Sebastes,Fish,13,5,629.0,"[505.0, 207.0, 37.0, 17.0]"
+119,Rathbunaster californicus,Sea star,9,5,744.0,"[530.0, 311.0, 31.0, 24.0]"
+119,Rathbunaster californicus,Sea star,10,5,378.0,"[529.0, 239.0, 27.0, 14.0]"
+119,Rathbunaster californicus,Sea star,11,5,408.0,"[379.0, 183.0, 24.0, 17.0]"
+119,Rathbunaster californicus,Sea star,15,5,504.0,"[549.0, 268.0, 28.0, 18.0]"
+119,Rathbunaster californicus,Sea star,16,5,456.0,"[517.0, 336.0, 24.0, 19.0]"
